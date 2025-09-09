@@ -15,8 +15,9 @@ io.on("connection", (socket) => {
   console.log("Connected:", socket.id);
 
   socket.on("register", (username) => {
-    users[username] = socket.id;
-    console.log(`${username} registered: ${socket.id}`);
+      users[username] = socket.id;
+      console.log(`${username} registered: ${socket.id}`);
+      io.emit("userList", Object.keys(users));
   });
 
   socket.on("call-user", ({ from, to, offer }) => {

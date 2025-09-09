@@ -22,10 +22,10 @@ export function useWebRTC(
     });
 
     socket.on("call-answered", async ({ from, answer }) => {
-      await pcRef.current.setRemoteDescription(answer);
-      setIsRinging(false);
-      setInCall(true);
-      startTimer();
+        await pcRef.current.setRemoteDescription(answer);
+        setIsRinging(false);
+        setInCall(true);
+        startTimer();
     });
 
     socket.on("call-rejected", ({ from }) => {

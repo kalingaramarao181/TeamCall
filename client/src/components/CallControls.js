@@ -1,12 +1,6 @@
 const CallControls = ({ isRinging, inCall, peerName, startCall, endCall }) => (
   <div className="vc-box">
-    <input
-      type="text"
-      placeholder="Enter peer name"
-      value={peerName.value}
-      onChange={(e) => peerName.set(e.target.value)}
-      className="vc-input"
-    />
+    <h3 className="vc-title">Voice Call to <span className="vc-title-username">{peerName.value}</span></h3>
     {!inCall ? (
       <button onClick={startCall} className="vc-btn vc-btn-success">Call</button>
     ) : (
