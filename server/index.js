@@ -6,20 +6,26 @@ const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: { origin: "*", methods: ["GET", "POST"] },
+  cors: { 
+    origin: "*", 
+    methods: ["GET", "POST"] 
+  },
 });
 
-let users = {}; // username -> socketId
+let users = {};
 
 io.on("connection", (socket) => {
   console.log("Connected:", socket.id);
 
+  // Register a user
   socket.on("register", (username) => {
-      users[username] = socket.id;
-      console.log(`${username} registered: ${socket.id}`);
-      io.emit("userList", Object.keys(users));
+    if (!username) return; 
+    users[username] = socket.id;
+    console.log(`${username} registered: ${socket.id}`);
+    io.emit("userList", Object.keys(users));
   });
 
+  // Call initiation
   socket.on("call-user", ({ from, to, offer }) => {
     const target = users[to];
     if (target) {
@@ -27,6 +33,7 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Answer call
   socket.on("answer-call", ({ from, to, answer }) => {
     const target = users[to];
     if (target) {
@@ -34,6 +41,7 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Reject call
   socket.on("call-rejected", ({ from, to }) => {
     const target = users[to];
     if (target) {
@@ -41,6 +49,7 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Exchange ICE candidates
   socket.on("ice-candidate", ({ from, to, candidate }) => {
     const target = users[to];
     if (target) {
@@ -48,12 +57,18 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Handle disconnect
   socket.on("disconnect", () => {
     for (let name in users) {
-      if (users[name] === socket.id) delete users[name];
+      if (users[name] === socket.id) {
+        delete users[name];
+      }
     }
+    io.emit("userList", Object.keys(users)); // notify remaining users
     console.log("Disconnected:", socket.id);
   });
 });
 
-server.listen(5000, () => console.log("Signaling server running on 5000"));
+// Use dynamic port for production hosting (Heroku, AWS, etc.)
+const PORT = process.env.PORT || 4022;
+server.listen(PORT, () => console.log(`Signaling server running on ${PORT}`));

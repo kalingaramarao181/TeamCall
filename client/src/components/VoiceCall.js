@@ -6,8 +6,8 @@ import CallTimer from "./CallTimer";
 import "./VoiceCall.css";
 
 const VoiceCall = ({ caller, callee }) => {
-  const [username] = useState(caller); // already registered user from sidebar
-  const [peerName, setPeerName] = useState(callee); // set from ChatHeader click
+  const [username] = useState(caller);
+  const [peerName, setPeerName] = useState(callee);
   const [incomingCall, setIncomingCall] = useState(null);
   const [isRinging, setIsRinging] = useState(false);
   const [inCall, setInCall] = useState(false);
@@ -55,7 +55,6 @@ const VoiceCall = ({ caller, callee }) => {
     setInCall(false);
   };
 
-  // Only start call if peerName exists
   const handleStartCall = () => {
     if (peerName) startCall(peerName);
   };
@@ -86,6 +85,8 @@ const VoiceCall = ({ caller, callee }) => {
         {inCall && (
           <div className="vc-call-status">
             <CallTimer callTime={callTime} />
+            {/* 🔹 Local (muted) + Remote audio */}
+            <audio id="localAudio" autoPlay muted></audio>
             <audio id="remoteAudio" autoPlay></audio>
           </div>
         )}

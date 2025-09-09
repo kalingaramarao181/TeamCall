@@ -1,7 +1,8 @@
+// src/utils/useWebRTC.js
 import { useEffect, useRef } from "react";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:5000");
+const socket = io("https://teamcall-api.bedatatech.com"); 
 
 export function useWebRTC(
   username,
@@ -22,10 +23,12 @@ export function useWebRTC(
     });
 
     socket.on("call-answered", async ({ from, answer }) => {
+      if (pcRef.current) {
         await pcRef.current.setRemoteDescription(answer);
         setIsRinging(false);
         setInCall(true);
         startTimer();
+      }
     });
 
     socket.on("call-rejected", ({ from }) => {
@@ -35,7 +38,9 @@ export function useWebRTC(
 
     socket.on("ice-candidate", async ({ candidate }) => {
       try {
-        await pcRef.current.addIceCandidate(candidate);
+        if (pcRef.current) {
+          await pcRef.current.addIceCandidate(candidate);
+        }
       } catch (err) {
         console.error("Error adding ICE:", err);
       }
@@ -51,6 +56,8 @@ export function useWebRTC(
 
   const createPeerConnection = () => {
     const pc = new RTCPeerConnection();
+
+    // Send ICE candidates to remote
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         socket.emit("ice-candidate", {
@@ -60,10 +67,20 @@ export function useWebRTC(
         });
       }
     };
+
+    // Receive remote stream
     pc.ontrack = (event) => {
-      const audio = document.getElementById("remoteAudio");
-      if (audio) audio.srcObject = event.streams[0];
+      console.log("Remote track received:", event.streams);
+      let audio = document.getElementById("remoteAudio");
+      if (!audio) {
+        audio = document.createElement("audio");
+        audio.id = "remoteAudio";
+        audio.autoplay = true;
+        document.body.appendChild(audio);
+      }
+      audio.srcObject = event.streams[0];
     };
+
     return pc;
   };
 
@@ -71,8 +88,11 @@ export function useWebRTC(
     pcRef.current = createPeerConnection();
     pcRef.current.remoteUsername = to;
 
+    // ✅ Add local audio
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    stream.getTracks().forEach((track) => pcRef.current.addTrack(track, stream));
+    stream.getTracks().forEach((track) =>
+      pcRef.current.addTrack(track, stream)
+    );
 
     const offer = await pcRef.current.createOffer();
     await pcRef.current.setLocalDescription(offer);
@@ -86,8 +106,11 @@ export function useWebRTC(
     pcRef.current = createPeerConnection();
     pcRef.current.remoteUsername = from;
 
+    // ✅ Add local audio
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    stream.getTracks().forEach((track) => pcRef.current.addTrack(track, stream));
+    stream.getTracks().forEach((track) =>
+      pcRef.current.addTrack(track, stream)
+    );
 
     await pcRef.current.setRemoteDescription(offer);
 
