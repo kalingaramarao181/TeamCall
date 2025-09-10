@@ -33,6 +33,14 @@ io.on("connection", (socket) => {
     }
   });
 
+   // ✅ Chat messaging
+  socket.on("send-message", ({ from, to, text }) => {
+    const target = users[to];
+    if (target) {
+      io.to(target).emit("receive-message", { from, text });
+    }
+  });
+
   // Answer call
   socket.on("answer-call", ({ from, to, answer }) => {
     const target = users[to];
@@ -70,5 +78,5 @@ io.on("connection", (socket) => {
 });
 
 // Use dynamic port for production hosting (Heroku, AWS, etc.)
-const PORT = process.env.PORT || 4022;
+const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Signaling server running on ${PORT}`));

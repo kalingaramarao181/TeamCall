@@ -78,7 +78,7 @@ const VoiceCall = ({ caller, callee }) => {
           <IncomingCallModal
             incomingCall={incomingCall}
             onAnswer={() => handleAnswer(incomingCall)}
-            onReject={() => handleReject(incomingCall)}
+            onReject={() => handleReject(incomingCall)} 
           />
         )}
 

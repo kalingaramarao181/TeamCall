@@ -1,6 +1,12 @@
 const IncomingCallModal = ({ incomingCall, onAnswer, onReject }) => {
   if (!incomingCall) return null;
 
+  const getInitials = (name) => {
+    const parts = name.split(" ");
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+  };
+
   const handleAnswer = () => {
     onAnswer(incomingCall); // pass caller info
   };
@@ -14,18 +20,18 @@ const IncomingCallModal = ({ incomingCall, onAnswer, onReject }) => {
       <div className="vc-modal">
         <div className="vc-avatar-ring">
           <div className="vc-avatar">
-            {incomingCall.from.charAt(0).toUpperCase()}
+            {getInitials(incomingCall.from)}
           </div>
         </div>
         <p className="vc-modal-text">
-          Incoming call from <strong>{incomingCall.from}</strong>
+          Incoming Voice Call from <strong>{incomingCall.from}</strong>
         </p>
         <div className="vc-actions">
           <button onClick={handleAnswer} className="vc-action vc-answer">
-            ✅
+            Accept
           </button>
           <button onClick={handleReject} className="vc-action vc-reject">
-            ❌
+            Decline
           </button>
         </div>
       </div>
